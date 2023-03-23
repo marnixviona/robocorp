@@ -14,6 +14,7 @@ Read orders file and complete all orders in the file. Save each order HTML recei
     Open the website
     Complete orders using the data from the orders file
     Create a ZIP file
+    Cleanup unneccessary folders
 
 
 *** Keywords ***
@@ -61,7 +62,7 @@ Store the receipt as a PDF file
     [Arguments]    ${number}
     Wait Until Element Is Visible    receipt
     ${receipt_html}=    Get Element Attribute    id:receipt    outerHTML
-    Html To Pdf    ${receipt_html}    ${OUTPUT_DIR}${/}receipt_${number}.pdf
+    Html To Pdf    ${receipt_html}    ${OUTPUT_DIR}${/}receipts${/}receipt_${number}.pdf
 
 Take a screenshot of the robot
     [Arguments]    ${number}
@@ -71,12 +72,16 @@ Take a screenshot of the robot
 
 Embed the robot screenshot to the receipt PDF file
     [Arguments]    ${number}
-    Open Pdf    ${OUTPUT_DIR}${/}receipt_${number}.pdf
+    Open Pdf    ${OUTPUT_DIR}${/}receipts${/}receipt_${number}.pdf
     Add Watermark Image To Pdf
     ...    ${OUTPUT_DIR}${/}screenshots${/}screenshot_${number}.png
-    ...    ${OUTPUT_DIR}${/}receipt_${number}.pdf
-    Close Pdf    ${OUTPUT_DIR}${/}receipt_${number}.pdf
+    ...    ${OUTPUT_DIR}${/}receipts${/}receipt_${number}.pdf
+    Close Pdf    ${OUTPUT_DIR}${/}receipts${/}receipt_${number}.pdf
 
 Create a ZIP file
-    Archive Folder With Zip    ${OUTPUT_DIR}    receipts.zip    include=*.pdf
-    Move File    %{ROBOT_ROOT}${/}receipts.zip    ${OUTPUT_DIR}    ${True}
+    ${archive}=    Set Variable    ${OUTPUT_DIR}/pdfs.zip
+    Archive Folder With Zip    ${OUTPUT_DIR}${/}receipts    ${archive}
+
+Cleanup unneccessary folders
+    Remove Directory    ${OUTPUT_DIR}${/}receipts    True
+    Remove Directory    ${OUTPUT_DIR}${/}screenshots    True
